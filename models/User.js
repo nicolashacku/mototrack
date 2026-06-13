@@ -27,16 +27,19 @@ const UserSchema = new mongoose.Schema(
       enum: ['OWNER', 'DRIVER'],
       required: [true, 'El rol es requerido'],
     },
-    // Referencia cruzada: si es DRIVER, a qué OWNER pertenece
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       default: null,
     },
-    // Moto asignada (solo para DRIVER)
     motocicleta: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Motorcycle',
+      default: null,
+    },
+    // Token de Expo para notificaciones push
+    pushToken: {
+      type: String,
       default: null,
     },
     activo: {
@@ -47,7 +50,6 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password antes de guardar
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -55,7 +57,6 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Método para comparar passwords
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
